@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoneyNet Enterprise Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar .logo {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .sidebar .logo h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar .logo p {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2em;
+        }
+        
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .api-key-display {
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-card.danger {
+            border-left-color: #e53e3e;
+        }
+        
+        .stat-card.success {
+            border-left-color: #38a169;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #d69e2e;
+        }
+        
+        .stat-card h3 {
+            color: #4a5568;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .change {
+            font-size: 0.9em;
+            color: #718096;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .chart-container h2 {
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .data-table h2 {
+            padding: 20px 30px;
+            background: #f7fafc;
+            margin: 0;
+            color: #2d3748;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 15px 30px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .table tbody tr:hover {
+            background: #f7fafc;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .status-badge.medium {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .status-badge.low {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>🛡️ HoneyNet</h1>
+            <p>Enterprise Dashboard</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li><a href="#dashboard" class="nav-link active" data-page="dashboard">
+                <span class="icon">📊</span> Dashboard
+            </a></li>
+            <li><a href="#threats" class="nav-link" data-page="threats">
+                <span class="icon">⚠️</span> Threat Analytics
+            </a></li>
+            <li><a href="#honeypots" class="nav-link" data-page="honeypots">
+                <span class="icon">🍯</span> Honeypots
+            </a></li>
+            <li><a href="#api" class="nav-link" data-page="api">
+                <span class="icon">🔌</span> API Management
+            </a></li>
+            <li><a href="#users" class="nav-link" data-page="users">
+                <span class="icon">👥</span> User Management
+            </a></li>
+            <li><a href="#reports" class="nav-link" data-page="reports">
+                <span class="icon">📈</span> Reports
+            </a></li>
+            <li><a href="#settings" class="nav-link" data-page="settings">
+                <span class="icon">⚙️</span> Settings
+            </a></li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+            <div class="header">
+                <div>
+                    <h1>Enterprise Dashboard</h1>
+                    <p>Real-time security overview for your organization</p>
+                </div>
+                <div class="user-info">
+                    <div class="api-key-display" id="api-key">
+                        API Key: Loading...
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card danger">
+                    <h3>Threats Detected Today</h3>
+                    <div class="value" id="threats-today">-</div>
+                    <div class="change">+12% from yesterday</div>
+                </div>
+                
+                <div class="stat-card success">
+                    <h3>Active Honeypots</h3>
+                    <div class="value" id="active-honeypots">-</div>
+                    <div class="change">All systems operational</div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <h3>API Calls Today</h3>
+                    <div class="value" id="api-calls-today">-</div>
+                    <div class="change">Within limits</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Avg Response Time</h3>
+                    <div class="value" id="avg-response-time">-</div>
+                    <div class="change">ms</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Threat Timeline (Last 30 Days)</h2>
+                <div class="chart-wrapper">
+                    <canvas id="threat-timeline-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="data-table">
+                <h2>Recent Threats</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Threat Type</th>
+                            <th>Source IP</th>
+                            <th>Target</th>
+                            <th>Severity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-threats">
+                        <tr>
+                            <td colspan="6" class="loading">Loading threat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Threats Page -->
+        <div id="threats-page" class="page" style="display: none;">
+            <div class="header">
+                <h1>Threat Analytics</h1>
+                <p>Advanced threat intelligence and analysis</p>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Threat Types Distribution</h2>
+                <div class="chart-wrapper">
+                    <canvas id="threat-types-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API Page -->
+        <div id="api-page" class="page" style="display: none;">
+            <div class="header">
+                <h1>API Management</h1>
+                <p>Manage your API keys and monitor usage</p>
+            </div>
+            
+            <div class="chart-container">
+                <h2>API Usage Statistics</h2>
+                <div class="chart-wrapper">
+                    <canvas id="api-usage-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Enterprise Dashboard JavaScript
+        class EnterpriseDashboard {
+            constructor() {
+                this.apiKey = localStorage.getItem('honeynet_enterprise_api_key') || 'demo_key';
+                this.baseURL = 'http://localhost:8001/enterprise';
+                this.charts = {};
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupNavigation();
+                this.loadDashboardData();
+                this.setupCharts();
+                
+                // Auto-refresh every 30 seconds
+                setInterval(() => {
+                    this.loadDashboardData();
+                }, 30000);
+            }
+            
+            setupNavigation() {
+                const navLinks = document.querySelectorAll('.nav-link');
+                const pages = document.querySelectorAll('.page');
+                
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Remove active class from all links and pages
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        pages.forEach(p => {
+                            p.classList.remove('active');
+                            p.style.display = 'none';
+                        });
+                        
+                        // Add active class to clicked link
+                        link.classList.add('active');
+                        
+                        // Show corresponding page
+                        const pageId = link.dataset.page + '-page';
+                        const page = document.getElementById(pageId);
+                        if (page) {
+                            page.classList.add('active');
+                            page.style.display = 'block';
+                        }
+                    });
+                });
+            }
+            
+            async loadDashboardData() {
+                try {
+                    const response = await axios.get(`${this.baseURL}/analytics/dashboard`, {
+                        headers: {
+                            'Authorization': `Bearer ${this.apiKey}`
+                        }
+                    });
+                    
+                    const data = response.data;
+                    this.updateDashboardStats(data);
+                    this.updateApiKeyDisplay(data.organization);
+                    
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                    this.showError('Failed to load dashboard data. Using demo data.');
+                    this.loadDemoData();
+                }
+            }
+            
+            updateDashboardStats(data) {
+                document.getElementById('threats-today').textContent = data.threats?.today || 0;
+                document.getElementById('active-honeypots').textContent = data.honeypots?.total || 0;
+                document.getElementById('api-calls-today').textContent = data.api_usage?.today_calls || 0;
+                document.getElementById('avg-response-time').textContent = 
+                    (data.api_usage?.avg_response_time || 0).toFixed(0);
+            }
+            
+            updateApiKeyDisplay(org) {
+                const apiKeyElement = document.getElementById('api-key');
+                if (org && org.name) {
+                    apiKeyElement.textContent = `Organization: ${org.name}`;
+                } else {
+                    apiKeyElement.textContent = 'API Key: Demo Mode';
+                }
+            }
+            
+            loadDemoData() {
+                // Demo data for presentation
+                document.getElementById('threats-today').textContent = '23';
+                document.getElementById('active-honeypots').textContent = '12';
+                document.getElementById('api-calls-today').textContent = '1,247';
+                document.getElementById('avg-response-time').textContent = '89';
+                
+                // Demo recent threats
+                const threatsTable = document.getElementById('recent-threats');
+                threatsTable.innerHTML = `
+                    <tr>
+                        <td>10:34 AM</td>
+                        <td>SQL Injection</td>
+                        <td>192.168.1.100</td>
+                        <td>Web Server</td>
+                        <td><span class="status-badge high">High</span></td>
+                        <td>Blocked</td>
+                    </tr>
+                    <tr>
+                        <td>10:28 AM</td>
+                        <td>Port Scan</td>
+                        <td>10.0.0.50</td>
+                        <td>Network</td>
+                        <td><span class="status-badge medium">Medium</span></td>
+                        <td>Monitored</td>
+                    </tr>
+                    <tr>
+                        <td>10:15 AM</td>
+                        <td>Malware</td>
+                        <td>172.16.0.25</td>
+                        <td>Endpoint</td>
+                        <td><span class="status-badge high">High</span></td>
+                        <td>Quarantined</td>
+                    </tr>
+                `;
+            }
+            
+            setupCharts() {
+                // Threat Timeline Chart
+                const timelineCtx = document.getElementById('threat-timeline-chart').getContext('2d');
+                this.charts.timeline = new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: this.generateDateLabels(30),
+                        datasets: [{
+                            label: 'Threats Detected',
+                            data: this.generateDemoData(30, 0, 50),
+                            borderColor: '#e53e3e',
+                            backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Threat Types Chart
+                const typesCtx = document.getElementById('threat-types-chart');
+                if (typesCtx) {
+                    this.charts.types = new Chart(typesCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Malware', 'SQL Injection', 'XSS', 'Port Scan', 'Brute Force'],
+                            datasets: [{
+                                data: [30, 25, 20, 15, 10],
+                                backgroundColor: [
+                                    '#e53e3e',
+                                    '#d69e2e',
+                                    '#38a169',
+                                    '#3182ce',
+                                    '#805ad5'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+                
+                // API Usage Chart
+                const apiCtx = document.getElementById('api-usage-chart');
+                if (apiCtx) {
+                    this.charts.api = new Chart(apiCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: this.generateDateLabels(7),
+                            datasets: [{
+                                label: 'API Calls',
+                                data: this.generateDemoData(7, 100, 2000),
+                                backgroundColor: '#667eea'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            generateDateLabels(days) {
+                const labels = [];
+                for (let i = days - 1; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    labels.push(date.toLocaleDateString());
+                }
+                return labels;
+            }
+            
+            generateDemoData(count, min, max) {
+                return Array.from({length: count}, () => 
+                    Math.floor(Math.random() * (max - min + 1)) + min
+                );
+            }
+            
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                
+                const mainContent = document.querySelector('.main-content');
+                mainContent.insertBefore(errorDiv, mainContent.firstChild);
+                
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 5000);
+            }
+        }
+        
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnterpriseDashboard();
+        });
+        
+        // API Key management
+        function setApiKey() {
+            const apiKey = prompt('Enter your Enterprise API Key:');
+            if (apiKey) {
+                localStorage.setItem('honeynet_enterprise_api_key', apiKey);
+                location.reload();
+            }
+        }
+        
+        // Add API key button to header
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInfo = document.querySelector('.user-info');
+            const apiButton = document.createElement('button');
+            apiButton.textContent = 'Set API Key';
+            apiButton.className = 'btn btn-primary';
+            apiButton.onclick = setApiKey;
+            userInfo.appendChild(apiButton);
+        });
+    </script>
+</body>
+</html>

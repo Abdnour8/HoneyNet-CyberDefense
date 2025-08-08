@@ -1,0 +1,143 @@
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+
+/**
+ * HoneyNet Mobile Android Configuration
+ */
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace "com.honeynet.global"
+
+    defaultConfig {
+        applicationId "com.honeynet.global"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 200
+        versionName "2.0.0"
+        
+        // Multi-language support
+        resConfigs "en", "he", "ar", "es", "fr", "de", "ru", "zh", "ja", "ko"
+        
+        // Enable multidex
+        multiDexEnabled true
+        
+        // Vector drawables support
+        vectorDrawables.useSupportLibrary = true
+    }
+    
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (project.hasProperty('HONEYNET_UPLOAD_STORE_FILE')) {
+                storeFile file(HONEYNET_UPLOAD_STORE_FILE)
+                storePassword HONEYNET_UPLOAD_STORE_PASSWORD
+                keyAlias HONEYNET_UPLOAD_KEY_ALIAS
+                keyPassword HONEYNET_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+    
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            applicationIdSuffix ".debug"
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            
+            // Optimize APK size
+            shrinkResources true
+            zipAlignEnabled true
+            
+            // Security
+            debuggable false
+        }
+    }
+    
+    // Split APKs by ABI for smaller downloads
+    splits {
+        abi {
+            reset()
+            enable enableSeparateBuildPerCPUArchitecture
+            universalApk false
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+        }
+    }
+    
+    // Map for the version code that gives each ABI a value
+    project.ext.abiCodes = ['armeabi-v7a': 1, 'x86': 2, 'arm64-v8a': 3, 'x86_64': 4]
+    
+    android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def abiVersionCode = project.ext.abiCodes.get(output.getFilter(com.android.build.OutputFile.ABI))
+            if (abiVersionCode != null) {
+                output.versionCodeOverride = abiVersionCode * 1000 + variant.versionCode
+            }
+        }
+    }
+    
+    // Packaging options
+    packagingOptions {
+        pickFirst "lib/x86/libc++_shared.so"
+        pickFirst "lib/x86_64/libc++_shared.so"
+        pickFirst "lib/arm64-v8a/libc++_shared.so"
+        pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    
+    // React Native
+    implementation "com.facebook.react:react-android"
+    
+    // Navigation
+    implementation 'androidx.navigation:navigation-fragment:2.7.5'
+    implementation 'androidx.navigation:navigation-ui:2.7.5'
+    
+    // Security
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    
+    // Networking
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    
+    // Storage
+    implementation 'androidx.room:room-runtime:2.6.1'
+    
+    // UI Components
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    
+    // Permissions
+    implementation 'com.karumi:dexter:6.2.3'
+    
+    // QR Code
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    
+    // Charts and Analytics
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    
+    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
+    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
+        exclude group:'com.squareup.okhttp3', module:'okhttp'
+    }
+    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
+    
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+}

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoneyNet Enterprise Pricing</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+        }
+        
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        .pricing-card.popular {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.popular::before {
+            content: "Most Popular";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .plan-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .plan-description {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .price {
+            margin-bottom: 30px;
+        }
+        
+        .price .amount {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .price .currency {
+            font-size: 1.5em;
+            color: #718096;
+        }
+        
+        .price .period {
+            color: #718096;
+            font-size: 1.1em;
+        }
+        
+        .features {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+        
+        .features li {
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f7fafc;
+        }
+        
+        .features li:last-child {
+            border-bottom: none;
+        }
+        
+        .features .icon {
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+        
+        .features .check {
+            color: #38a169;
+        }
+        
+        .features .cross {
+            color: #e53e3e;
+        }
+        
+        .cta-button {
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .cta-button:hover {
+            background: linear-gradient(45deg, #5a67d8, #6b46c1);
+            transform: translateY(-2px);
+        }
+        
+        .cta-button.secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .cta-button.secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .enterprise-contact {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .enterprise-contact h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .enterprise-contact p {
+            font-size: 1.2em;
+            color: #718096;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .contact-item {
+            text-align: center;
+        }
+        
+        .contact-item .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .contact-item h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .contact-item p {
+            color: #718096;
+        }
+        
+        .contact-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .faq-section {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            margin-bottom: 40px;
+        }
+        
+        .faq-section h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #2d3748;
+        }
+        
+        .faq-item {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 20px;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-question {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .faq-answer {
+            color: #718096;
+            line-height: 1.8;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-card.popular {
+                transform: none;
+            }
+            
+            .enterprise-contact,
+            .faq-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🛡️ HoneyNet Enterprise</h1>
+            <p>Choose the perfect plan for your organization's cybersecurity needs</p>
+        </header>
+        
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">🆓 Community</div>
+                <div class="plan-description">Perfect for individuals and small teams getting started with HoneyNet</div>
+                
+                <div class="price">
+                    <span class="currency">$</span><span class="amount">0</span>
+                    <div class="period">Forever Free</div>
+                </div>
+                
+                <ul class="features">
+                    <li><span class="icon check">✅</span> Basic threat detection</li>
+                    <li><span class="icon check">✅</span> 5 honeypots</li>
+                    <li><span class="icon check">✅</span> Community support</li>
+                    <li><span class="icon check">✅</span> 1,000 API calls/month</li>
+                    <li><span class="icon check">✅</span> Basic analytics</li>
+                    <li><span class="icon cross">❌</span> Advanced threat intelligence</li>
+                    <li><span class="icon cross">❌</span> Custom integrations</li>
+                    <li><span class="icon cross">❌</span> Priority support</li>
+                </ul>
+                
+                <a href="http://18.209.27.121" class="cta-button secondary" target="_blank">
+                    Start Free Now
+                </a>
+            </div>
+            
+            <!-- Professional Plan -->
+            <div class="pricing-card popular">
+                <div class="plan-name">💼 Professional</div>
+                <div class="plan-description">Advanced features for growing businesses and security teams</div>
+                
+                <div class="price">
+                    <span class="currency">$</span><span class="amount">49</span>
+                    <div class="period">per month</div>
+                </div>
+                
+                <ul class="features">
+                    <li><span class="icon check">✅</span> Everything in Community</li>
+                    <li><span class="icon check">✅</span> 50 honeypots</li>
+                    <li><span class="icon check">✅</span> Advanced threat intelligence</li>
+                    <li><span class="icon check">✅</span> 50,000 API calls/month</li>
+                    <li><span class="icon check">✅</span> Custom dashboards</li>
+                    <li><span class="icon check">✅</span> Email alerts</li>
+                    <li><span class="icon check">✅</span> Third-party integrations</li>
+                    <li><span class="icon check">✅</span> Priority email support</li>
+                </ul>
+                
+                <button class="cta-button" onclick="selectPlan('professional')">
+                    Start 14-Day Free Trial
+                </button>
+            </div>
+            
+            <!-- Enterprise Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">🏢 Enterprise</div>
+                <div class="plan-description">Complete solution for large organizations with advanced security needs</div>
+                
+                <div class="price">
+                    <span class="currency">$</span><span class="amount">199</span>
+                    <div class="period">per month</div>
+                </div>
+                
+                <ul class="features">
+                    <li><span class="icon check">✅</span> Everything in Professional</li>
+                    <li><span class="icon check">✅</span> Unlimited honeypots</li>
+                    <li><span class="icon check">✅</span> Unlimited API calls</li>
+                    <li><span class="icon check">✅</span> Advanced analytics & reporting</li>
+                    <li><span class="icon check">✅</span> Multi-user management</li>
+                    <li><span class="icon check">✅</span> SSO integration</li>
+                    <li><span class="icon check">✅</span> 24/7 phone support</li>
+                    <li><span class="icon check">✅</span> 99.9% SLA guarantee</li>
+                </ul>
+                
+                <button class="cta-button" onclick="selectPlan('enterprise')">
+                    Start 30-Day Free Trial
+                </button>
+            </div>
+        </div>
+        
+        <div class="enterprise-contact">
+            <h2>🌟 Custom Enterprise Solutions</h2>
+            <p>Need something more? We offer custom solutions for large enterprises, government agencies, and organizations with specific requirements.</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span class="icon">📧</span>
+                    <h3>Email Us</h3>
+                    <p><a href="mailto:enterprise@zeevtech.com">enterprise@zeevtech.com</a></p>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="icon">📞</span>
+                    <h3>Call Us</h3>
+                    <p>+972-8-123-4567</p>
+                    <p>Available 24/7</p>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="icon">🏢</span>
+                    <h3>Visit Us</h3>
+                    <p>Ze'ev Weinerich Technologies Ltd.</p>
+                    <p>HaHartzit 3, Ashdod, Israel</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="faq-section">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">What's included in the free plan?</div>
+                <div class="faq-answer">The Community plan includes basic threat detection, 5 honeypots, community support, and 1,000 API calls per month. It's perfect for individuals and small teams getting started with HoneyNet.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I upgrade or downgrade my plan anytime?</div>
+                <div class="faq-answer">Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and billing is prorated accordingly.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Do you offer custom enterprise solutions?</div>
+                <div class="faq-answer">Absolutely! We work with large enterprises to create custom solutions that meet their specific security requirements. Contact our enterprise team for a personalized quote.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">What payment methods do you accept?</div>
+                <div class="faq-answer">We accept all major credit cards, PayPal, bank transfers, and can arrange invoicing for enterprise customers.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is there a setup fee?</div>
+                <div class="faq-answer">No setup fees! All plans include free setup and onboarding. Our team will help you get started quickly and efficiently.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">What kind of support do you provide?</div>
+                <div class="faq-answer">Community users get access to our knowledge base and community forums. Professional users get priority email support, and Enterprise users get 24/7 phone support with dedicated account management.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function selectPlan(planType) {
+            // In a real implementation, this would redirect to a payment processor
+            // or show a signup form
+            
+            const plans = {
+                professional: {
+                    name: 'Professional',
+                    price: '$49/month',
+                    features: 'Advanced threat intelligence, 50 honeypots, 50K API calls'
+                },
+                enterprise: {
+                    name: 'Enterprise', 
+                    price: '$199/month',
+                    features: 'Unlimited everything, 24/7 support, 99.9% SLA'
+                }
+            };
+            
+            const plan = plans[planType];
+            
+            if (confirm(`You selected the ${plan.name} plan (${plan.price}).\n\nFeatures: ${plan.features}\n\nWould you like to proceed to checkout?`)) {
+                // Redirect to payment page or show signup form
+                alert('Redirecting to secure checkout...\n\nIn a real implementation, this would integrate with Stripe, PayPal, or another payment processor.');
+                
+                // For demo purposes, show contact information
+                window.open('mailto:enterprise@zeevtech.com?subject=HoneyNet ' + plan.name + ' Plan Signup&body=Hi, I would like to sign up for the ' + plan.name + ' plan. Please send me the payment details and setup instructions.');
+            }
+        }
+        
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all pricing cards
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+    "server": {
+        "host": "localhost",
+        "port": 8000,
+        "debug": false,
+        "log_level": "INFO"
+    },
+    "security": {
+        "enable_encryption": true,
+        "max_login_attempts": 3,
+        "session_timeout": 3600,
+        "enable_2fa": false
+    },
+    "honeypots": {
+        "auto_create": true,
+        "max_honeypots": 100,
+        "cleanup_interval": 86400,
+        "default_types": [
+            "file",
+            "network",
+            "credential"
+        ]
+    },
+    "monitoring": {
+        "enable_file_monitoring": true,
+        "enable_network_monitoring": true,
+        "alert_threshold": 5,
+        "log_retention_days": 30
+    },
+    "ai": {
+        "enable_threat_analysis": true,
+        "learning_mode": "adaptive",
+        "confidence_threshold": 0.7,
+        "model_update_interval": 3600
+    },
+    "notifications": {
+        "enable_email": false,
+        "enable_sms": false,
+        "enable_desktop": true,
+        "email_server": "",
+        "email_port": 587
+    },
+    "performance": {
+        "max_memory_usage": 1024,
+        "max_cpu_usage": 80,
+        "enable_caching": true,
+        "cache_size": 256
+    }
+}
